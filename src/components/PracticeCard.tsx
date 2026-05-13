@@ -11,7 +11,7 @@ type PracticeCardProps = {
 
 export function PracticeCard({ item, favorite, onFavorite }: PracticeCardProps) {
   return (
-    <article className="relative mx-auto grid min-h-[440px] w-full max-w-[560px] border border-stone-300 bg-[var(--paper)] px-8 py-10 shadow-[0_4px_0_0_#111] sm:min-h-[520px] sm:px-14">
+    <article className="relative mx-auto grid min-h-[440px] w-full max-w-[640px] border border-stone-300 bg-[var(--paper)] px-7 py-10 shadow-[0_4px_0_0_#111] sm:min-h-[520px] sm:px-12">
       <button
         type="button"
         onClick={onFavorite}
@@ -23,9 +23,13 @@ export function PracticeCard({ item, favorite, onFavorite }: PracticeCardProps) 
       </button>
       <div className="self-center text-center">
         <p className="kicker mb-8">{item.mode.replace("_", " ")}</p>
-        <h1 className="text-balance text-5xl font-black leading-none text-[var(--green)] sm:text-7xl">{item.text}</h1>
-        <p className="mt-8 text-2xl font-semibold tracking-[0.08em] text-stone-700">{item.breakdown}</p>
-        {item.ipa && <p className="mt-4 font-mono text-lg text-stone-500">{item.ipa}</p>}
+        <h1 className="mx-auto max-w-full overflow-hidden text-balance break-words text-center text-[clamp(2.75rem,6vw,4.75rem)] font-black leading-none text-[var(--green)]">
+          {item.text}
+        </h1>
+        <p className="mx-auto mt-8 max-w-full overflow-hidden break-words text-xl font-semibold tracking-[0.08em] text-stone-700 sm:text-2xl">
+          {item.breakdown}
+        </p>
+        {item.ipa && <p className="mx-auto mt-4 max-w-full overflow-hidden break-words font-mono text-base text-stone-500 sm:text-lg">{item.ipa}</p>}
       </div>
       {item.sentence && <p className="self-end border-t border-stone-200 pt-6 text-center text-base leading-7 text-stone-600">{item.sentence}</p>}
     </article>

@@ -61,14 +61,14 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
       });
 
       if (!response.ok) throw new Error("Could not generate a fresh session.");
-      const payload = (await response.json()) as { items?: PracticeItem[]; fallback?: boolean };
+      const payload = (await response.json()) as { items?: PracticeItem[]; fallback?: boolean; message?: string };
       const items = payload.items?.length
         ? payload.items
         : getFallbackItems(settings.mode, settings.domain, settings.difficulty, settings.count);
       set({
         items,
         loading: false,
-        error: payload.fallback ? "Using built-in practice set until an OpenAI API key is added." : undefined,
+        error: payload.fallback ? (payload.message ?? "Using built-in practice set until AI generation is available.") : undefined,
       });
     } catch {
       set({

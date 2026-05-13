@@ -18,8 +18,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-[var(--paper)] text-stone-950">
-      <aside className="fixed inset-y-0 left-0 hidden w-80 border-r border-stone-200 bg-[var(--paper)] px-10 py-12 lg:flex lg:flex-col">
-        <Link href="/" className="brand text-5xl">
+      <aside className="fixed inset-y-0 left-0 hidden w-[22rem] border-r border-stone-200 bg-[var(--paper)] px-9 py-12 lg:flex lg:flex-col">
+        <Link href="/" className="brand max-w-full whitespace-nowrap text-[clamp(2rem,2.2vw,2.5rem)]">
           TounGueGym
         </Link>
         <p className="mt-6 max-w-52 text-sm tracking-[0.16em] text-stone-600">
@@ -49,7 +49,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           Profile
         </div>
       </aside>
-      <main className="min-h-screen lg:pl-80">{children}</main>
+      <main className="min-h-screen lg:pl-[22rem]">{children}</main>
     </div>
   );
 }
