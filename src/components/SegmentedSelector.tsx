@@ -14,16 +14,16 @@ type SegmentedSelectorProps<T extends string> = {
 
 export function SegmentedSelector<T extends string>({ label, options, value, onChange }: SegmentedSelectorProps<T>) {
   return (
-    <section className="space-y-6 border-t border-stone-200 pt-14">
-      <p className="kicker text-center">{label}</p>
-      <div className="flex flex-wrap justify-center gap-0">
+    <section className="space-y-3">
+      <p className="kicker">{label}</p>
+      <div className="flex flex-wrap gap-2 rounded-[1.35rem] border border-[var(--line)] bg-[var(--surface-strong)] p-1.5">
         {options.map((option) => (
           <button
             key={option.value}
             type="button"
             onClick={() => onChange(option.value)}
-            className={`min-h-14 min-w-40 border border-stone-200 px-8 text-sm transition ${
-              value === option.value ? "border-stone-950 bg-stone-100 text-stone-950" : "text-stone-600 hover:border-stone-500"
+            className={`min-h-11 flex-1 rounded-2xl px-5 text-sm font-semibold transition ${
+              value === option.value ? "bg-[var(--accent-dark)] text-[var(--surface)] shadow-sm" : "text-[var(--muted)] hover:bg-[var(--surface)]"
             }`}
           >
             {option.label}

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, UserCircle } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { DomainSelector } from "@/components/DomainSelector";
 import { SegmentedSelector } from "@/components/SegmentedSelector";
 import { SessionSetupModal } from "@/components/SessionSetupModal";
@@ -21,41 +22,91 @@ export default function Home() {
   const [count, setCount] = useState(savedSettings.count);
   const [modalOpen, setModalOpen] = useState(false);
 
-  async function beginSession(nextCount = count) {
+  function beginSession(nextCount = count) {
     const cleanDomain = domain.trim() || "Everyday";
-    await startSession({ mode, domain: cleanDomain, difficulty, count: nextCount });
-    router.push("/practice");
+    void startSession({ mode, domain: cleanDomain, difficulty, count: nextCount });
+  }
+
+  function practiceHref(nextCount = count) {
+    const params = new URLSearchParams({
+      mode,
+      domain: domain.trim() || "Everyday",
+      difficulty,
+      count: String(nextCount),
+    });
+
+    return `/practice?${params.toString()}`;
   }
 
   return (
-    <main className="min-h-screen bg-[var(--paper)]">
-      <header className="mx-auto flex h-24 max-w-5xl items-center justify-between border-b border-stone-200 px-6">
-        <div className="brand text-4xl">TounGueGym</div>
-        <UserCircle className="size-7 text-stone-500" strokeWidth={1.8} />
+    <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,#fff8eb_0,#efe6d8_42%,#e6dac9_100%)]">
+      <header className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5">
+        <div className="brand text-2xl">TounGueGym</div>
+        <div className="rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 py-2 text-sm font-semibold text-[var(--muted)]">
+          Pronunciation gym
+        </div>
       </header>
-      <section className="mx-auto flex min-h-[calc(100vh-6rem)] max-w-3xl flex-col px-6 py-20 text-center">
-        <div className="mb-24">
-          <h1 className="brand text-6xl sm:text-7xl">TounGueGym</h1>
-          <p className="mt-8 text-xl text-stone-600">Practice the rhythm of speech.</p>
+      <section className="mx-auto grid max-w-6xl items-start gap-10 px-5 pb-20 pt-10 lg:grid-cols-[0.9fr_1.1fr] lg:pt-20">
+        <div className="relative pt-6 text-center lg:text-left">
+          {["T", "S", "R", "L"].map((letter, index) => (
+            <span
+              key={letter}
+              className="absolute hidden size-12 rotate-[-12deg] place-items-center rounded-2xl border border-[var(--line)] bg-[var(--surface)] text-xl font-black text-[var(--accent-dark)] shadow-[0_18px_36px_rgb(79_57_35/0.14)] lg:grid"
+              style={{
+                left: `${index % 2 ? 78 : 4}%`,
+                top: `${index * 22 + 8}%`,
+                transform: `rotate(${index % 2 ? 16 : -14}deg)`,
+              }}
+            >
+              {letter}
+            </span>
+          ))}
+          <div className="mx-auto mb-6 flex w-fit items-center gap-2 rounded-full bg-[var(--surface)] px-4 py-2 text-sm font-semibold text-[var(--muted)] lg:mx-0">
+            <Sparkles className="size-4 text-[var(--accent)]" />
+            AI-made drills for clear speech
+          </div>
+          <h1 className="brand mx-auto max-w-2xl text-[clamp(3rem,8vw,6.4rem)] leading-[0.96] lg:mx-0">
+            Practice words that trip your tongue.
+          </h1>
+          <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-[var(--muted)] lg:mx-0">
+            Pick a focus, get fresh articulation drills, and move one item at a time without hunting for what to practice next.
+          </p>
+          <div className="mx-auto mt-8 grid max-w-xl grid-cols-3 gap-3 lg:mx-0">
+            {["One-at-a-time", "Favorites", "Quick sets"].map((item) => (
+              <div key={item} className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-3 py-4 text-center text-sm font-bold text-[var(--accent-dark)]">
+                {item}
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="space-y-14">
+        <div className="soft-card rounded-[2.4rem] p-5 sm:p-8">
+          <div className="mb-8">
+            <p className="kicker">Session setup</p>
+            <h2 className="mt-3 text-3xl font-black text-[var(--ink)]">Build today&apos;s practice</h2>
+          </div>
+        <div className="space-y-6">
           <SegmentedSelector label="Mode" options={modes} value={mode} onChange={setMode} />
           <DomainSelector value={domain} customValue={customDomain} onChange={setDomain} onCustomChange={setCustomDomain} />
           <SegmentedSelector label="Difficulty" options={difficulties} value={difficulty} onChange={setDifficulty} />
         </div>
 
-        <div className="mt-20 flex flex-col items-center gap-4">
-          <button
-            type="button"
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Link
+            href={practiceHref()}
             onClick={() => beginSession()}
-            className="flex h-20 w-full max-w-sm items-center justify-center gap-5 bg-[var(--green)] text-sm font-bold tracking-[0.28em] text-white transition hover:scale-[1.01]"
+            className="soft-button flex h-14 flex-1 items-center justify-center gap-3 rounded-2xl text-sm font-bold transition hover:-translate-y-0.5"
           >
             Start Session <ArrowRight className="size-6" />
-          </button>
-          <button type="button" onClick={() => setModalOpen(true)} className="h-12 text-sm font-semibold tracking-[0.2em] text-stone-600">
+          </Link>
+          <button
+            type="button"
+            onClick={() => setModalOpen(true)}
+            className="h-14 rounded-2xl border border-[var(--line)] bg-[var(--surface-strong)] px-6 text-sm font-bold text-[var(--accent-dark)]"
+          >
             Quick Setup
           </button>
+        </div>
         </div>
       </section>
       <SessionSetupModal
@@ -65,7 +116,7 @@ export default function Home() {
         onClose={() => setModalOpen(false)}
         onStart={() => {
           setModalOpen(false);
-          void beginSession(count);
+          router.push(practiceHref(count));
         }}
       />
     </main>

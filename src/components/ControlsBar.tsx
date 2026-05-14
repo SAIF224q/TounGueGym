@@ -12,10 +12,11 @@ type ControlsBarProps = {
 };
 
 export function ControlsBar({ onPrevious, onNext, onRepeat, onShuffle, onFavorite, previousDisabled }: ControlsBarProps) {
-  const iconButton = "grid size-14 place-items-center border border-transparent text-stone-600 transition hover:border-stone-300 hover:text-stone-950 disabled:opacity-30";
+  const iconButton =
+    "grid size-12 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--muted)] transition hover:-translate-y-0.5 hover:text-[var(--ink)] disabled:translate-y-0 disabled:opacity-35";
 
   return (
-    <div className="mt-12 flex items-center justify-center gap-5">
+    <div className="mx-auto mt-6 flex w-fit items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface-strong)] p-2 shadow-[0_16px_40px_rgb(79_57_35/0.1)]">
       <button className={iconButton} type="button" onClick={onPrevious} disabled={previousDisabled} title="Previous" aria-label="Previous">
         <ArrowLeft className="size-6" />
       </button>
@@ -28,8 +29,14 @@ export function ControlsBar({ onPrevious, onNext, onRepeat, onShuffle, onFavorit
       <button className={iconButton} type="button" onClick={onFavorite} title="Favorite" aria-label="Favorite">
         <Star className="size-6" />
       </button>
-      <button className="grid size-20 place-items-center rounded-full border border-stone-950 bg-[var(--green)] text-white shadow-sm transition hover:scale-[1.02]" type="button" onClick={onNext} title="Next" aria-label="Next">
-        <ArrowRight className="size-8" />
+      <button
+        className="grid size-14 place-items-center rounded-full bg-[var(--accent)] text-white shadow-[0_10px_24px_rgb(198_95_37/0.25)] transition hover:-translate-y-0.5"
+        type="button"
+        onClick={onNext}
+        title="Next"
+        aria-label="Next"
+      >
+        <ArrowRight className="size-7" />
       </button>
     </div>
   );
