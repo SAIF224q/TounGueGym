@@ -5,11 +5,14 @@ import { getFallbackItems } from "@/lib/sample-data";
 import { readFavorites, readSettings, writeFavorites, writeRecentSession, writeSettings } from "@/lib/storage";
 import type { Difficulty, PracticeItem, PracticeMode, SessionSettings } from "@/lib/types";
 
+const TOTAL_STAGES = 5;
+
 type PracticeState = {
   hydrated: boolean;
   settings: SessionSettings;
   items: PracticeItem[];
   index: number;
+  stageIndex: number;
   favorites: PracticeItem[];
   loading: boolean;
   error?: string;
@@ -23,6 +26,9 @@ type PracticeState = {
   toggleFavorite: (item: PracticeItem) => void;
   isFavorite: (id: string) => boolean;
   finishSession: () => void;
+  advanceStage: () => void;
+  previousStage: () => void;
+  resetStage: () => void;
 };
 
 const defaultSettings: SessionSettings = {
@@ -37,6 +43,7 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
   settings: defaultSettings,
   items: getFallbackItems(defaultSettings.mode, defaultSettings.domain, defaultSettings.difficulty, defaultSettings.count),
   index: 0,
+  stageIndex: 0,
   favorites: [],
   loading: false,
   sessionNewFavorites: 0,
@@ -47,10 +54,11 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
       settings,
       favorites: readFavorites(),
       items: getFallbackItems(settings.mode, settings.domain, settings.difficulty, settings.count),
+      stageIndex: 0,
     });
   },
   startSession: async (settings) => {
-    set({ loading: true, error: undefined, settings, index: 0, sessionNewFavorites: 0 });
+    set({ loading: true, error: undefined, settings, index: 0, stageIndex: 0, sessionNewFavorites: 0 });
     writeSettings(settings);
 
     try {
@@ -78,15 +86,15 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
       });
     }
   },
-  next: () => set((state) => ({ index: Math.min(state.index + 1, state.items.length) })),
-  previous: () => set((state) => ({ index: Math.max(state.index - 1, 0) })),
-  repeat: () => set((state) => ({ index: state.index })),
+  next: () => set((state) => ({ index: Math.min(state.index + 1, state.items.length), stageIndex: 0 })),
+  previous: () => set((state) => ({ index: Math.max(state.index - 1, 0), stageIndex: 0 })),
+  repeat: () => set((state) => ({ index: state.index, stageIndex: 0 })),
   shuffle: () => {
     const { items, index } = get();
     const current = items[index];
     const rest = items.filter((item) => item.id !== current?.id);
     const shuffled = [...rest].sort(() => Math.random() - 0.5);
-    set({ items: current ? [current, ...shuffled] : shuffled, index: 0 });
+    set({ items: current ? [current, ...shuffled] : shuffled, index: 0, stageIndex: 0 });
   },
   toggleFavorite: (item) => {
     const exists = get().favorites.some((favorite) => favorite.id === item.id);
@@ -101,15 +109,38 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
   },
   isFavorite: (id) => get().favorites.some((item) => item.id === id),
   finishSession: () => {
-    const { settings, items, index, sessionNewFavorites } = get();
+    const { settings, items, index, stageIndex, sessionNewFavorites } = get();
+    const effectiveIndex = index >= items.length ? items.length : index;
     writeRecentSession({
       ...settings,
       id: crypto.randomUUID(),
       completedAt: new Date().toISOString(),
-      itemsPracticed: Math.min(index, items.length),
+      itemsPracticed: effectiveIndex + (stageIndex > 0 ? 1 : 0),
       newFavorites: sessionNewFavorites,
     });
   },
+  advanceStage: () => {
+    const { stageIndex, index, items } = get();
+    if (stageIndex < TOTAL_STAGES - 1) {
+      set({ stageIndex: stageIndex + 1 });
+    } else {
+      const nextIndex = index + 1;
+      if (nextIndex >= items.length) {
+        set({ index: items.length, stageIndex: 0 });
+      } else {
+        set({ index: nextIndex, stageIndex: 0 });
+      }
+    }
+  },
+  previousStage: () => {
+    const { stageIndex, index } = get();
+    if (stageIndex > 0) {
+      set({ stageIndex: stageIndex - 1 });
+    } else if (index > 0) {
+      set({ index: index - 1, stageIndex: TOTAL_STAGES - 1 });
+    }
+  },
+  resetStage: () => set({ stageIndex: 0 }),
 }));
 
 export function formatMode(mode: PracticeMode) {

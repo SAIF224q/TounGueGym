@@ -7,7 +7,10 @@ import { ArrowRight, CheckCheck } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { ControlsBar } from "@/components/ControlsBar";
 import { PracticeCard } from "@/components/PracticeCard";
+import { StageProgress } from "@/components/StageProgress";
 import { usePracticeStore } from "@/store/usePracticeStore";
+import { PRACTICE_STAGES } from "@/lib/practice-flow";
+import type { PracticeStage } from "@/lib/practice-flow";
 
 export default function PracticePage() {
   return (
@@ -19,11 +22,13 @@ export default function PracticePage() {
 
 function PracticeContent() {
   const searchParams = useSearchParams();
-  const { items, index, settings, loading, error, startSession, next, previous, repeat, shuffle, toggleFavorite, isFavorite, finishSession } =
+  const { items, index, stageIndex, settings, loading, error, startSession, advanceStage, previousStage, repeat, shuffle, toggleFavorite, isFavorite, finishSession } =
     usePracticeStore();
-  const item = items[index];
+
   const complete = index >= items.length;
-  const progress = items.length ? Math.min(index + 1, items.length) : 0;
+  const item = items[index];
+  const stage: PracticeStage = PRACTICE_STAGES[stageIndex] ?? PRACTICE_STAGES[0];
+  const progress = items.length ? index + 1 : 0;
 
   useEffect(() => {
     if (complete && items.length) finishSession();
@@ -113,14 +118,16 @@ function PracticeContent() {
             </section>
           ) : item ? (
             <div className="w-full">
-              <PracticeCard item={item} favorite={isFavorite(item.id)} onFavorite={() => toggleFavorite(item)} />
+              <StageProgress currentStage={stage} />
+              <PracticeCard item={item} stage={stage} favorite={isFavorite(item.id)} onFavorite={() => toggleFavorite(item)} />
               <ControlsBar
-                onPrevious={previous}
-                onNext={next}
+                stage={stage}
+                onPrevious={previousStage}
+                onNext={advanceStage}
                 onRepeat={repeat}
                 onShuffle={shuffle}
                 onFavorite={() => toggleFavorite(item)}
-                previousDisabled={index === 0}
+                previousDisabled={index === 0 && stageIndex === 0}
               />
             </div>
           ) : (
