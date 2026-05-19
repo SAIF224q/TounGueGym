@@ -2,10 +2,12 @@
 
 import { create } from "zustand";
 import { getFallbackItems } from "@/lib/sample-data";
-import { readFavorites, readSettings, writeFavorites, writeRecentSession, writeSettings } from "@/lib/storage";
-import type { Difficulty, PracticeItem, PracticeMode, SessionSettings } from "@/lib/types";
+import { readFavorites, readPracticeHistory, readSettings, writeFavorites, writePracticeHistory, writeRecentSession, writeSettings } from "@/lib/storage";
+import type { Difficulty, PracticeHistoryRecord, PracticeItem, PracticeMode, SessionSettings } from "@/lib/types";
+import type { PracticeRating } from "@/lib/repetition-engine";
+import { calculatePriority, getRevisitCandidates, mergeSessionItems, ratePracticeItem } from "@/lib/repetition-engine";
 
-const TOTAL_STAGES = 5;
+const TOTAL_STAGES = 6;
 
 type PracticeState = {
   hydrated: boolean;
@@ -17,6 +19,7 @@ type PracticeState = {
   loading: boolean;
   error?: string;
   sessionNewFavorites: number;
+  practiceHistory: PracticeHistoryRecord[];
   hydrate: () => void;
   startSession: (settings: SessionSettings) => Promise<void>;
   next: () => void;
@@ -29,6 +32,8 @@ type PracticeState = {
   advanceStage: () => void;
   previousStage: () => void;
   resetStage: () => void;
+  rateItem: (itemId: string, rating: PracticeRating) => void;
+  getRevisitItems: (count: number) => PracticeItem[];
 };
 
 const defaultSettings: SessionSettings = {
@@ -47,12 +52,14 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
   favorites: [],
   loading: false,
   sessionNewFavorites: 0,
+  practiceHistory: [],
   hydrate: () => {
     const settings = readSettings() ?? defaultSettings;
     set({
       hydrated: true,
       settings,
       favorites: readFavorites(),
+      practiceHistory: readPracticeHistory(),
       items: getFallbackItems(settings.mode, settings.domain, settings.difficulty, settings.count),
       stageIndex: 0,
     });
@@ -62,6 +69,8 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
     writeSettings(settings);
 
     try {
+      const revisitIds = getRevisitCandidates(get().practiceHistory, Math.floor(settings.count * 0.3));
+
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -70,11 +79,14 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
 
       if (!response.ok) throw new Error("Could not generate a fresh session.");
       const payload = (await response.json()) as { items?: PracticeItem[]; fallback?: boolean; message?: string };
-      const items = payload.items?.length
+      const newItems = payload.items?.length
         ? payload.items
         : getFallbackItems(settings.mode, settings.domain, settings.difficulty, settings.count);
+
+      const revisitItemIds = mergeSessionItems(newItems, revisitIds);
+
       set({
-        items,
+        items: newItems,
         loading: false,
         error: payload.fallback ? (payload.message ?? "Using built-in practice set until AI generation is available.") : undefined,
       });
@@ -141,6 +153,16 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
     }
   },
   resetStage: () => set({ stageIndex: 0 }),
+  rateItem: (itemId, rating) => {
+    const updated = ratePracticeItem(get().practiceHistory, itemId, rating);
+    writePracticeHistory(updated);
+    set({ practiceHistory: updated });
+  },
+  getRevisitItems: (count) => {
+    const { practiceHistory } = get();
+    const ids = getRevisitCandidates(practiceHistory, count);
+    return ids.map((id) => ({ id } as PracticeItem));
+  },
 }));
 
 export function formatMode(mode: PracticeMode) {

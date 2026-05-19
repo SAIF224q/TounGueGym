@@ -104,6 +104,21 @@ export function PracticeCard({ item, stage, favorite, onFavorite }: PracticeCard
             </div>
           </div>
         )}
+
+        {stage === "rate" && (
+          <div className="py-3">
+            <p className="kicker mb-8">Quick reflection</p>
+            <div className="mx-auto flex flex-col items-center gap-4">
+              <h1
+                className="text-balance break-words text-center font-black leading-[1.15] text-[var(--ink)] [overflow-wrap:anywhere]"
+                style={{ fontSize: titleSize }}
+              >
+                {item.text}
+              </h1>
+              <p className="max-w-sm text-sm leading-7 text-[var(--muted)]">Select how this word felt to pronounce.</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {(stage === "pronounce" || stage === "repeat") && (

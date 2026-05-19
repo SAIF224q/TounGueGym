@@ -1,9 +1,10 @@
-import type { PracticeItem, RecentSession, SessionSettings } from "./types";
+import type { PracticeHistoryRecord, PracticeItem, RecentSession, SessionSettings } from "./types";
 
 const keys = {
   favorites: "favorites",
   recentSessions: "recent_sessions",
   settings: "settings",
+  practiceHistory: "practice_history",
 };
 
 function readJson<T>(key: string, fallback: T): T {
@@ -45,4 +46,12 @@ export function readRecentSessions() {
 export function writeRecentSession(session: RecentSession) {
   const sessions = readRecentSessions();
   writeJson(keys.recentSessions, [session, ...sessions].slice(0, 12));
+}
+
+export function readPracticeHistory() {
+  return readJson<PracticeHistoryRecord[]>(keys.practiceHistory, []);
+}
+
+export function writePracticeHistory(history: PracticeHistoryRecord[]) {
+  writeJson(keys.practiceHistory, history);
 }

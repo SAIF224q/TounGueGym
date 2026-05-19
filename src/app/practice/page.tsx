@@ -6,11 +6,13 @@ import { useSearchParams } from "next/navigation";
 import { ArrowRight, CheckCheck } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { ControlsBar } from "@/components/ControlsBar";
+import { DifficultyRating } from "@/components/DifficultyRating";
 import { PracticeCard } from "@/components/PracticeCard";
 import { StageProgress } from "@/components/StageProgress";
 import { usePracticeStore } from "@/store/usePracticeStore";
 import { PRACTICE_STAGES } from "@/lib/practice-flow";
 import type { PracticeStage } from "@/lib/practice-flow";
+import type { PracticeRating } from "@/lib/repetition-engine";
 
 export default function PracticePage() {
   return (
@@ -22,7 +24,7 @@ export default function PracticePage() {
 
 function PracticeContent() {
   const searchParams = useSearchParams();
-  const { items, index, stageIndex, settings, loading, error, startSession, advanceStage, previousStage, repeat, shuffle, toggleFavorite, isFavorite, finishSession } =
+  const { items, index, stageIndex, settings, loading, error, startSession, advanceStage, previousStage, repeat, shuffle, toggleFavorite, isFavorite, finishSession, rateItem } =
     usePracticeStore();
 
   const complete = index >= items.length;
@@ -53,6 +55,13 @@ function PracticeContent() {
       });
     }
   }, [searchParams, startSession]);
+
+  const handleRate = (rating: PracticeRating) => {
+    if (item) {
+      rateItem(item.id, rating);
+    }
+    advanceStage();
+  };
 
   return (
     <AppShell>
@@ -120,10 +129,11 @@ function PracticeContent() {
             <div className="w-full">
               <StageProgress currentStage={stage} />
               <PracticeCard item={item} stage={stage} favorite={isFavorite(item.id)} onFavorite={() => toggleFavorite(item)} />
+              {stage === "rate" && <DifficultyRating onRate={handleRate} />}
               <ControlsBar
                 stage={stage}
                 onPrevious={previousStage}
-                onNext={advanceStage}
+                onNext={stage === "rate" ? () => {} : advanceStage}
                 onRepeat={repeat}
                 onShuffle={shuffle}
                 onFavorite={() => toggleFavorite(item)}

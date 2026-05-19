@@ -18,6 +18,22 @@ export function ControlsBar({ stage, onPrevious, onNext, onRepeat, onShuffle, on
   const iconButton =
     "grid size-12 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--muted)] transition hover:-translate-y-0.5 hover:text-[var(--ink)] disabled:translate-y-0 disabled:opacity-35";
 
+  if (stage === "rate") {
+    return (
+      <div className="mx-auto mt-6 flex w-fit items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface-strong)] p-2 shadow-[0_16px_40px_rgb(79_57_35/0.1)]">
+        <button
+          className="grid h-14 min-w-44 place-items-center rounded-full bg-[var(--accent)] px-8 text-white shadow-[0_10px_24px_rgb(198_95_37/0.25)] transition hover:-translate-y-0.5"
+          type="button"
+          onClick={onNext}
+          title={stageButtonLabels[stage]}
+          aria-label={stageButtonLabels[stage]}
+        >
+          <span className="text-sm font-bold">{stageButtonLabels[stage]}</span>
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto mt-6 flex w-fit items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface-strong)] p-2 shadow-[0_16px_40px_rgb(79_57_35/0.1)]">
       <button className={iconButton} type="button" onClick={onPrevious} disabled={previousDisabled} title="Previous" aria-label="Previous">

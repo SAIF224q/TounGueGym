@@ -4,6 +4,7 @@ export const PRACTICE_STAGES = [
   "pronounce",
   "context",
   "repeat",
+  "rate",
 ] as const;
 
 export type PracticeStage = (typeof PRACTICE_STAGES)[number];
@@ -14,6 +15,7 @@ export const stageLabels: Record<PracticeStage, string> = {
   pronounce: "Pronounce",
   context: "Context",
   repeat: "Repeat",
+  rate: "Rate",
 };
 
 export const stageButtonLabels: Record<PracticeStage, string> = {
@@ -21,7 +23,8 @@ export const stageButtonLabels: Record<PracticeStage, string> = {
   chunk: "Continue",
   pronounce: "Continue",
   context: "Start Repeating",
-  repeat: "Next Word",
+  repeat: "How did it feel?",
+  rate: "Next Word",
 };
 
 export const totalStages = PRACTICE_STAGES.length;

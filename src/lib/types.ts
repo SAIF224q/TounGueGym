@@ -26,3 +26,13 @@ export type RecentSession = SessionSettings & {
   itemsPracticed: number;
   newFavorites: number;
 };
+
+export type PracticeRating = "easy" | "tricky" | "difficult";
+
+export type PracticeHistoryRecord = {
+  itemId: string;
+  rating: PracticeRating;
+  repetitionCount: number;
+  lastPracticedAt: number;
+  nextReviewAt?: number;
+};
