@@ -5,6 +5,8 @@ export type Difficulty = "easy" | "medium" | "hard";
 export type PracticeItem = {
   id: string;
   text: string;
+  /** Articulation drill units for the Chunk stage (from AI or curated fallback). */
+  chunks: string[];
   breakdown: string;
   ipa?: string;
   sentence?: string;

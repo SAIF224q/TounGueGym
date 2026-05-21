@@ -5,9 +5,8 @@ import { getFallbackItems } from "@/lib/sample-data";
 import { readFavorites, readPracticeHistory, readSettings, writeFavorites, writePracticeHistory, writeRecentSession, writeSettings } from "@/lib/storage";
 import type { Difficulty, PracticeHistoryRecord, PracticeItem, PracticeMode, SessionSettings } from "@/lib/types";
 import type { PracticeRating } from "@/lib/repetition-engine";
+import { totalStages } from "@/lib/practice-flow";
 import { calculatePriority, getRevisitCandidates, mergeSessionItems, ratePracticeItem } from "@/lib/repetition-engine";
-
-const TOTAL_STAGES = 6;
 
 type PracticeState = {
   hydrated: boolean;
@@ -133,7 +132,7 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
   },
   advanceStage: () => {
     const { stageIndex, index, items } = get();
-    if (stageIndex < TOTAL_STAGES - 1) {
+    if (stageIndex < totalStages - 1) {
       set({ stageIndex: stageIndex + 1 });
     } else {
       const nextIndex = index + 1;
@@ -149,7 +148,7 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
     if (stageIndex > 0) {
       set({ stageIndex: stageIndex - 1 });
     } else if (index > 0) {
-      set({ index: index - 1, stageIndex: TOTAL_STAGES - 1 });
+      set({ index: index - 1, stageIndex: totalStages - 1 });
     }
   },
   resetStage: () => set({ stageIndex: 0 }),

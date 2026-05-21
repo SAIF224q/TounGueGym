@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { normalizeChunks } from "@/lib/chunks";
 import { getFallbackItems } from "@/lib/sample-data";
 import type { Difficulty, PracticeItem, PracticeMode, SessionSettings } from "@/lib/types";
 
@@ -49,9 +50,22 @@ export async function POST(request: Request) {
                 "Generate content that is difficult to pronounce.",
                 "Match the requested domain, difficulty, and mode.",
                 "Use real-life words and phrases rather than obscure dictionary-only vocabulary.",
-                "The breakdown must be readable for non-IPA users.",
+                "chunks: 2-6 short parts to practice in order for articulation (orthographic or morpheme-style when helpful, e.g. hemoglobin -> [\"hemo\", \"globin\"], entrepreneurial -> [\"en\", \"tre\", \"pre\", \"neur\"]). Must be substrings of text in order; do not use phonetic spellings in chunks.",
+                "breakdown: separate readable pronunciation guide with hyphens and stress caps (e.g. HEE-muh-GLOH-bin). Do not derive chunks from breakdown hyphen splits.",
                 "Use an empty string for ipa when unsure.",
                 "Use an example sentence that helps pronunciation practice.",
+              ],
+              examples: [
+                {
+                  text: "hemoglobin",
+                  chunks: ["hemo", "globin"],
+                  breakdown: "HEE-muh-GLOH-bin",
+                },
+                {
+                  text: "Entrepreneurial",
+                  chunks: ["en", "tre", "pre", "neur"],
+                  breakdown: "on-truh-pruh-NUR-ee-ul",
+                },
               ],
             }),
           },
@@ -73,9 +87,15 @@ export async function POST(request: Request) {
                   items: {
                     type: "object",
                     additionalProperties: false,
-                    required: ["text", "breakdown", "ipa", "sentence"],
+                    required: ["text", "chunks", "breakdown", "ipa", "sentence"],
                     properties: {
                       text: { type: "string" },
+                      chunks: {
+                        type: "array",
+                        items: { type: "string" },
+                        minItems: 2,
+                        maxItems: 8,
+                      },
                       breakdown: { type: "string" },
                       ipa: { type: "string" },
                       sentence: { type: "string" },
@@ -115,6 +135,7 @@ export async function POST(request: Request) {
 
     const items = parsed.items.slice(0, count).map((item, index) => ({
       ...item,
+      chunks: normalizeChunks(item.text, item.chunks),
       id: `${mode}-${domain}-${difficulty}-${index}-${item.text.toLowerCase().replaceAll(/\s+/g, "-")}`,
       mode,
       domain,
