@@ -9,7 +9,21 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="theme-obsidian">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('tg-theme') || 'obsidian';
+                  document.documentElement.className = 'theme-' + theme;
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body>
         <HydrateStore />
         {children}
